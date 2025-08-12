@@ -1,0 +1,311 @@
+<!-- please please try to add a undo and redo switch for this objekts will be used as per gemini  -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Analog Clock</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image:url(bg.jpg);
+      background-size:cover;
+    }
+  
+    .clock {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border: 2px solid #333;
+      border-radius: 50%;
+      background-color:rgba(255,255,255,0.2);
+    }
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom;
+      background-color: #333;
+    }
+    #hour {
+      width: 4px;
+      height: 60px;
+      margin-left: -2px;
+    }
+    #minute {
+      width: 2px;
+      height: 70px;
+      margin-left: -1px;
+    }
+    #second {
+      width: 1px;
+      height: 80px;
+      margin-left: -0.5px;
+      background-color: red;
+    }
+
+    /***/
+    .container{
+      height:600px;
+      width:800px;
+      background-color: rgba(255,255,255,0.2);
+      backdrop-filter:blur(10px);
+      display:flex;
+      border-radius:15px;
+      border:1px solid rgba(255,255,255,0.3);
+    }
+    .clock-side{
+      flex:0 0 40%;
+      padding:20px;
+    }
+    .to-do-container{
+      height:500px;
+      width:400px;
+      background-color:rgba(255,255,255,0.2);
+      border:3px solid rgba(255,255,255,0.3);
+      border-radius:15px;
+      display:flex;
+      flex-direction: column;
+      align-items:center;
+    }
+    .title{
+      padding:20px;
+      font-family:sans-serif;
+      font-weight: bolder;
+      font-size: 45px;
+    }
+    .input-task{
+      border-radius: 10px;
+      height:35px;
+      width:300px;
+      border: none;
+      outline:none;
+      padding:10px;
+      box-sizing:border-box;
+    }
+    .button-task{
+      border:none;
+      margin:10px;
+      padding:10px;
+      border-radius:10px;
+      background-color:green;
+      color:white;
+      font-weight:bolder;
+    }
+    .task-wrapper{
+      display:flex;
+      justify-content:space-evenly;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .task-list{
+      margin-top:10px;
+      width:100%;
+      overflow-y: auto;
+    }
+    .task-item{
+      background-color:white;
+      font-weight:bolder;
+      border-radius:10px;
+      height:35px;
+      width:250px;
+      display: flex;
+      align-items: center;
+      padding:0 10px;
+      box-sizing: border-box;
+      font-size: 16px;
+      font-family: sans-serif;
+    }
+    .new-task-bar{
+     background-color:white;
+      font-weight:bolder;
+      border-radius:10px;
+      height:35px;
+      width:250px;
+      display: flex;
+      align-items: center;
+      padding:0 10px;
+      box-sizing: border-box; 
+      border:none;
+      outline:none;
+      font-size:16px;
+      font-family: sans-serif;
+    }
+    .task-item span{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #delete-button{
+      height:30px;
+      width:70px;
+      background-color:red;
+      color:white;
+      font-weight:bolder;
+      border-radius:10px;
+      cursor:pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .right-column{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-grow:1;
+    }
+    
+    .hidden{
+      display:none !important;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="clock-side">
+        <div class="clock">
+        <div id="hour" class="hand"></div>
+        <div id="minute" class="hand"></div>
+        <div id="second" class="hand"></div>
+    </div>
+    </div>
+      <div class="right-column">
+        <div class="to-do-container">
+          <div class="title">Tasks</div>
+          <div class="theBar">
+            <input type="text" class="input-task" placeholder=" Type here...">
+            <button class="button-task">Start</button>
+          </div>
+          <div class="task-list"></div>
+        </div>
+      </div>
+  </div>
+</body>
+  <script>
+    let inputText = document.querySelector('.input-task');
+    let buttonTask = document.querySelector('.button-task');
+    let taskList = document.querySelector('.task-list');
+
+    let currentlyEditing=0;
+    let history=[];
+
+    function addTask(){
+      let Text = inputText.value.trim();
+
+      if(Text === '') return;
+
+      const taskWrapper = document.createElement('div');
+      taskWrapper.className = 'task-wrapper';
+
+      const newTask = document.createElement('div');
+      newTask.className = 'task-item';
+      
+
+      const spanTask = document.createElement('span');
+      spanTask.className = 'span-task';
+      spanTask.textContent = Text;
+       history.push(spanTask.textContent);
+
+      const dlt = document.createElement('div');
+      dlt.textContent = 'Delete';
+      dlt.id = 'delete-button';
+
+      const newTaskBar = document.createElement('input');
+      newTaskBar.className = 'new-task-bar';
+      newTaskBar.style.display = 'none';
+
+      newTask.appendChild(spanTask);
+      
+      taskWrapper.appendChild(newTask);
+      taskWrapper.appendChild(newTaskBar);
+      taskWrapper.appendChild(dlt);
+      
+
+      taskList.appendChild(taskWrapper);
+
+      inputText.value = '';
+
+      dlt.addEventListener('click',function(){
+        this.parentElement.remove();
+      })
+
+      
+      newTask.addEventListener('click',function(){
+        if(currentlyEditing){
+        currentlyEditing.NewTask.classList.remove('hidden');
+        currentlyEditing.NewTaskBar.style.display = 'none';
+      }
+
+        newTaskBar.value = spanTask.textContent;
+         history.push(spanTask.textContent);
+        newTask.classList.add('hidden');
+        newTaskBar.style.display='block';
+        newTaskBar.focus();
+        currentlyEditing={
+        NewTask: newTask,
+        NewTaskBar: newTaskBar,
+      }
+    })  
+
+
+      newTaskBar.addEventListener('keydown',function(event){
+        if(newTaskBar.value==='') return;
+        if(event.key === 'Enter'){
+          let editText = newTaskBar.value.trim();
+          spanTask.textContent = editText;
+          history.push(spanTask.textContent);
+          newTaskBar.style.display='none';
+          newTask.classList.remove('hidden');
+          currentlyEditing=0;
+        }
+      })
+      newTaskBar.addEventListener('blur',function(){
+        newTaskBar.style.display='none';
+        newTask.classList.remove('hidden');
+        currentlyEditing=0;
+      })
+    }
+
+    buttonTask.addEventListener('click',addTask);
+
+    inputText.addEventListener('keydown',function(event){
+      if(event.key === 'Enter'){
+        addTask();
+      }
+    })
+
+    
+
+    /////////////////////////////////////////////////
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      let seconds = now.getSeconds();
+
+      // Convert to 12-hour format and calculate angles
+      hours = hours % 12;
+      const hourDeg = (hours * 30) + (minutes * 0.5); // 360/12 = 30 degrees per hour
+      const minuteDeg = (minutes * 6); // 360/60 = 6 degrees per minute
+      const secondDeg = (seconds * 6); // 360/60 = 6 degrees per second
+
+      // Rotate hands
+      document.getElementById('hour').style.transform = `rotate(${hourDeg}deg)`;
+      document.getElementById('minute').style.transform = `rotate(${minuteDeg}deg)`;
+      document.getElementById('second').style.transform = `rotate(${secondDeg}deg)`;
+    }
+
+    // Update clock every second
+    setInterval(updateClock, 1000);
+    updateClock(); // Initial call
+  </script>
+</html>
